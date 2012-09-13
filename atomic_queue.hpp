@@ -44,26 +44,11 @@ public:
 
     void push(const T& t)
     {
-        typename NodeAllocator::pointer new_obj = alc_.allocate(1);
-        ValueAllocator(alc_).construct(&new_obj->t, t);
-        new_obj->next = nullptr;
+        typename NodeAllocator::pointer new_node = alc_.allocate(1);
+        ValueAllocator(alc_).construct(&new_node->t, t);
+        new_node->next = nullptr;
 
-        // old_end = end.atomic_exchange(new_obj);
-        node<T>* old_end = end_; end_ = new_obj;
-
-        node<T>* null_node = nullptr;
-
-        // if front_ was set to null (no node yet), we have to update the front_ pointer.
-
-        if(front_ == null_node) front_ = new_obj; else { null_node = front_; // atomic_compare_exchange(front, &null_node, new_obj)
-        // {
-
-            // if front_ is not null, then there was a previous node.
-            // We have to update this nodes next pointer.
-            old_end->next  = new_obj; // atomic_store(&old_end->next, new_obj)
-        }
-
-        ++size_;
+        push_node(new_node);
     }
 
     T* pop()
@@ -113,7 +98,28 @@ public:
     {
         return size_;
     }
-private:
+protected:
+
+    void push_node(node<T>* new_node)
+    {
+        // old_end = end.atomic_exchange(new_node);
+        node<T>* old_end = end_; end_ = new_node;
+        node<T>* null_node = nullptr;
+
+        // if front_ was set to null (no node yet), we have to update the front_ pointer.
+        if(front_ == null_node) front_ = new_node; else { null_node = front_; // atomic_compare_exchange(front, &null_node, new_node)
+        // {
+
+            // if front_ is not null, then there was a previous node.
+            // We have to update this nodes next pointer.
+            old_end->next  = new_node; // atomic_store(&old_end->next, new_node)
+        }
+
+        ++size_;
+    }
+
+
+
     typedef Allocator ValueAllocator;
     typedef typename Allocator::template rebind<node<T>>::other NodeAllocator;
 
