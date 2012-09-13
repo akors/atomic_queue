@@ -121,7 +121,7 @@ protected:
 
 
     typedef Allocator ValueAllocator;
-    typedef typename Allocator::template rebind<node<T>>::other NodeAllocator;
+    typedef typename Allocator::template rebind<node<T> >::other NodeAllocator;
 
     NodeAllocator alc_;
     std::size_t size_;
