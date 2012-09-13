@@ -1,0 +1,10 @@
+
+CPPFLAGS = /I.. $(CPPFLAGS)
+
+ALL_TESTS = base_pushpop.exe
+
+all: $(ALL_TESTS)
+
+clean:
+	del /q *.obj
+	del /q $(ALL_TESTS)
