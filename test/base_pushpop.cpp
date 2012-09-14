@@ -2,30 +2,89 @@
 
 #include <iostream>
 
-int main()
+#include "testutils.hpp"
+
+DECLARE_TEST("class atomic_queue_base")
+
+
+void test_int()
 {
+    std::cout<<" === Testing integer push/pop ==="<<'\n';
+
     aq::atomic_queue<int> ai;
 
     ai.push(1);
-    std::cout<<"Size is now "<<ai.size()<<'\n';
-
     ai.push(22);
     ai.push(330);
     ai.push(4400);
     std::cout<<"Size is now "<<ai.size()<<'\n';
+    TEST_ASSERT(ai.size() == 4);
 
-    for(unsigned i = 0; i < 4; ++i)
+    int* p;
+    while (p = ai.pop())
     {
-        int* p = ai.pop();
-        if (!p)
-        {
-            std::cout<<"Qeue is empty!\n";
-            continue;
-        }
-
         std::cout<<"Popping "<<*p<<'\n';
         ai.deallocate(p);
     }
 
-    return 0;
+    std::cout<<"Size is now "<<ai.size()<<'\n';
+    TEST_ASSERT(ai.size() == 0);
+}
+
+struct Obj {
+    int data;
+
+    Obj(int id, std::size_t idx)
+    {
+        data = calculate_data(id, idx);
+    }
+
+    static int calculate_data(int id, std::size_t idx)
+    {
+        return id ^ idx;
+    }
+};
+
+const std::size_t NUM_PUSHES = 0xFF;
+
+void test_obj()
+{
+    std::cout<<" === Testing Object push/pop ==="<<'\n';
+
+    int id = 0xFF;
+    std::size_t idx;
+
+    aq::atomic_queue<Obj> ao;
+
+    TEST_ASSERT(ao.pop() == nullptr);
+    TEST_ASSERT(ao.size() == 0);
+
+    std::cout<<"Pushing "<<NUM_PUSHES<<" objects.\n";
+
+    for (idx = 0x00; idx < (0x00+NUM_PUSHES); ++idx)
+        ao.push(Obj(id, idx));
+
+    std::cout<<"Size is now "<<ao.size()<<'\n';
+    TEST_ASSERT(ao.size() == NUM_PUSHES);
+
+    idx = 0x00;
+
+    Obj* p;
+    while (p = ao.pop())
+    {
+        TEST_ASSERT(p->data == Obj::calculate_data(id, idx));
+        ao.deallocate(p);
+        ++idx;
+    }
+
+    TEST_ASSERT(ao.size() == 0);
+}
+
+int main()
+{
+    test_int();
+    std::cout<<std::endl;
+    test_obj();
+
+    return CONCLUDE_TEST();
 }
