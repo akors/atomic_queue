@@ -45,7 +45,14 @@ public:
     void push(const T& t)
     {
         typename NodeAllocator::pointer new_node = alc_.allocate(1);
-        ValueAllocator(alc_).construct(&new_node->t, t);
+
+        try {
+            ValueAllocator(alc_).construct(&new_node->t, t);
+        } catch(...)
+        {
+            alc_.deallocate(new_node, 1);
+            throw;
+        }
         new_node->next = nullptr;
 
         push_node(new_node);
