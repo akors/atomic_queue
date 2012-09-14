@@ -118,16 +118,13 @@ protected:
         ++size_;
     }
 
-
-
     typedef Allocator ValueAllocator;
     typedef typename Allocator::template rebind<node<T> >::other NodeAllocator;
 
-    NodeAllocator alc_;
     std::size_t size_;
-
     node<T>* front_;
     node<T>* end_;
+    NodeAllocator alc_;
 };
 
 } // namespace detail
