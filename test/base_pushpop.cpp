@@ -4,7 +4,7 @@
 
 #include "testutils.hpp"
 
-DECLARE_TEST("class atomic_queue_base")
+DECLARE_TEST("base Push/Pop operations")
 
 
 void test_int()
@@ -32,12 +32,14 @@ void test_int()
 }
 
 struct Obj {
-    int data;
+    int id_;
+    std::size_t idx_;
+    int data_;
 
     Obj(int id, std::size_t idx)
-    {
-        data = calculate_data(id, idx);
-    }
+        : id_(id), idx_(idx), data_(calculate_data(id_, idx_))
+    { }
+
 
     static int calculate_data(int id, std::size_t idx)
     {
@@ -72,7 +74,7 @@ void test_obj()
     Obj* p;
     while (p = ao.pop())
     {
-        TEST_ASSERT(p->data == Obj::calculate_data(id, idx));
+        TEST_ASSERT(p->data_ == Obj::calculate_data(id, idx));
         ao.deallocate(p);
         ++idx;
     }

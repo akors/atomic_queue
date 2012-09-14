@@ -1,7 +1,7 @@
 
 CPPFLAGS = /I.. $(CPPFLAGS)
 
-ALL_TESTS = base_pushpop.exe
+ALL_TESTS = base_pushpop.exe base_destruct.exe
 
 all: $(ALL_TESTS)
 
