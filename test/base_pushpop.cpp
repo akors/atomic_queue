@@ -21,7 +21,7 @@ void test_int()
     TEST_ASSERT(ai.size() == 4);
 
     int* p;
-    while (p = ai.pop())
+    while ((p = ai.pop()))
     {
         std::cout<<"Popping "<<*p<<'\n';
         ai.deallocate(p);
@@ -72,7 +72,7 @@ void test_obj()
     idx = 0x00;
 
     Obj* p;
-    while (p = ao.pop())
+    while ((p = ao.pop()))
     {
         TEST_ASSERT(p->data_ == Obj::calculate_data(id, idx));
         ao.deallocate(p);

@@ -72,7 +72,7 @@ int main()
     std::cout<<"Number of constructions: "<<construct_counter<<std::endl;
 
     Obj* p;
-    while (p = ao.pop())
+    while ((p = ao.pop()))
     {
         ao.deallocate(p);
     }
