@@ -32,12 +32,12 @@ public:
     {
         node<T>* fr = front_; // atomic_load
 
-        while(front_)
+        while(fr)
         {
             node<T>* next = fr->next;
-            alc_.destroy(front_);
-            alc_.deallocate(front_, 1);
-            front_ = next;
+            alc_.destroy(fr);
+            alc_.deallocate(fr, 1);
+            fr = next;
         }
 
     }
@@ -81,6 +81,9 @@ public:
     void deallocate(T* obj)
     {
         if (!obj) return;
+
+        // call destructor
+        alc_.destroy(reinterpret_cast<node<T>*>(obj));
 
         // nodes with next == 0 are still referenced by an executing
         // push() function and the next ptr will be modified.
