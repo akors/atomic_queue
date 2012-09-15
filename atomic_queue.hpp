@@ -3,6 +3,8 @@
 
 #include <cstddef>
 #include <memory>
+#include <atomic>
+#include <thread>
 
 namespace aq {
 
@@ -12,7 +14,7 @@ template <typename T>
 struct node
 {
     T t;
-    node<T>* next;
+    std::atomic<node<T>*> next;
 };
 
 
@@ -60,27 +62,20 @@ public:
 
     T* pop()
     {
-        node<T>* old_front = front_; // atomic_load
+        node<T>* old_front = front_;
         node<T>* new_front;
 
         do {
             if (!old_front) return nullptr; // nothing to pop
             new_front = old_front->next;
-        } while( ((front_ == old_front) ? front_ = new_front : old_front = front_), !(front_ == new_front) ); // !(atomic_cmp_xchg(front, &old_front, new_front)
+        } while(!front_.compare_exchange_weak(old_front, new_front));
 
         --size_;
 
         // if the old front was also the end, the queue is now empty.
         new_front = old_front;
-        if(end_ == new_front) { end_ = nullptr;  // atomic_cmp_xchg(end_, &old_front, nullptr);
-        // {
-            // if end_ actually was old_front, there is no way that someone is
-            // still referencing the old_front node, so we set old_front->next
-            // to a nonzero value to signal the deleter it's cool to delete
-            // this node
+        if(end_.compare_exchange_strong(new_front, nullptr))
             old_front->next = old_front;
-        }
-        else new_front = end_;
 
         return reinterpret_cast<T*>(old_front);
     }
@@ -96,10 +91,8 @@ public:
         // push() function and the next ptr will be modified.
         // Since we don't want the function to write to deallocated
         // memory, we hang in a loop until the node has a non-zero next ptr.
-
-        while(!reinterpret_cast<node<T>*>(obj)->next) // atomic_load(obj->next)
-            // std::this_thread.yield() ???
-        ;
+        while(!reinterpret_cast<node<T>*>(obj)->next)
+            std::this_thread::yield();
 
         alc_.deallocate(reinterpret_cast<node<T>*>(obj), 1);
     }
@@ -112,18 +105,15 @@ protected:
 
     void push_node(node<T>* new_node)
     {
-        // old_end = end.atomic_exchange(new_node);
-        node<T>* old_end = end_; end_ = new_node;
+        node<T>* old_end = end_.exchange(new_node);
         node<T>* null_node = nullptr;
 
-        // if front_ was set to null (no node yet), we have to update the front_ pointer.
-        if(front_ == null_node) front_ = new_node; else { null_node = front_; // atomic_compare_exchange(front, &null_node, new_node)
-        // {
-
+        // if front_ was set to null (no node yet), we have to update the front_
+        // pointer.
+        if(!front_.compare_exchange_strong(null_node, new_node))
             // if front_ is not null, then there was a previous node.
             // We have to update this nodes next pointer.
-            old_end->next  = new_node; // atomic_store(&old_end->next, new_node)
-        }
+            old_end->next  = new_node;
 
         ++size_;
     }
@@ -131,9 +121,9 @@ protected:
     typedef Allocator ValueAllocator;
     typedef typename Allocator::template rebind<node<T> >::other NodeAllocator;
 
-    std::size_t size_;
-    node<T>* front_;
-    node<T>* end_;
+    std::atomic_size_t size_;
+    std::atomic<node<T>*> front_;
+    std::atomic<node<T>*> end_;
     NodeAllocator alc_;
 };
 
