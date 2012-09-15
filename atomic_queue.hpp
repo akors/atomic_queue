@@ -91,7 +91,7 @@ public:
         // push() function and the next ptr will be modified.
         // Since we don't want the function to write to deallocated
         // memory, we hang in a loop until the node has a non-zero next ptr.
-        while(!reinterpret_cast<node<T>*>(obj)->next)
+        while(!reinterpret_cast<node<T>*>(obj)->next.load())
             std::this_thread::yield();
 
         alc_.deallocate(reinterpret_cast<node<T>*>(obj), 1);
