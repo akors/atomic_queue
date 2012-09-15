@@ -14,8 +14,8 @@ struct Obj {
     Obj(std::size_t idx, bool will_throw = false)
         : idx_(idx), will_throw_(will_throw)
     {}
-    
-    Obj(const Obj& other) : idx_(other.idx_) 
+
+    Obj(const Obj& other) : idx_(other.idx_)
     { if(other.will_throw_) throw other.will_throw_; }
 };
 
@@ -37,7 +37,7 @@ int main()
     }
     catch(bool)
     {
-        std::cout<<"Caught exception. Hope everyone is still ok!";
+        std::cout<<"Caught exception. Hope everyone is still ok!\n";
     }
     idx++;
 
