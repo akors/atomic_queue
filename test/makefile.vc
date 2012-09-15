@@ -1,9 +1,17 @@
 
 CPPFLAGS = /I.. $(CPPFLAGS)
 
-ALL_TESTS = base_pushpop.exe base_destruct.exe
+ALL_TESTS = base_pushpop.exe base_destruct.exe base_exceptions.exe
 
 all: $(ALL_TESTS)
+
+check: $(ALL_TESTS)
+	set ALL_TESTS=$(ALL_TESTS)
+	call <<run_tests.bat
+@echo off
+setlocal enabledelayedexpansion
+for %%t in (%ALL_TESTS%) do %%t
+<<
 
 clean:
 	del /q *.obj
