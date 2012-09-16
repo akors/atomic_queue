@@ -6,6 +6,13 @@
 #include <atomic>
 #include <thread>
 
+// At the time of writing, MSVC didn't know noexcept
+#if defined(_MSC_VER)
+#if _MSC_VER <= 1700
+#   define noexcept
+#endif
+#endif
+
 namespace aq {
 
 namespace detail {
@@ -22,7 +29,7 @@ template <typename T, typename Allocator = std::allocator<T> >
 class atomic_queue
 {
 public:
-    atomic_queue(const Allocator& alc = Allocator())
+    atomic_queue(const Allocator& alc = Allocator()) noexcept
         : size_(0u), front_(nullptr), end_(nullptr),
         alc_(alc)
     {
@@ -30,7 +37,7 @@ public:
 
     // NOT threadsafe!!! Why would you call the destructor if the object is in
     // use? Are you crazy?
-    ~atomic_queue()
+    ~atomic_queue() noexcept
     {
         node<T>* fr = front_; // atomic_load
 
@@ -60,7 +67,7 @@ public:
         push_node(new_node);
     }
 
-    T* pop()
+    T* pop() noexcept
     {
         node<T>* old_front = front_;
         node<T>* new_front;
@@ -80,7 +87,7 @@ public:
         return reinterpret_cast<T*>(old_front);
     }
 
-    void deallocate(T* obj)
+    void deallocate(T* obj) noexcept
     {
         if (!obj) return;
 
@@ -97,13 +104,13 @@ public:
         alc_.deallocate(reinterpret_cast<node<T>*>(obj), 1);
     }
 
-    std::size_t size() const
+    std::size_t size() const noexcept
     {
         return size_;
     }
 protected:
 
-    void push_node(node<T>* new_node)
+    void push_node(node<T>* new_node) noexcept
     {
         node<T>* old_end = end_.exchange(new_node);
         node<T>* null_node = nullptr;
