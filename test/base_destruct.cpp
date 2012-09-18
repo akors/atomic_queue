@@ -50,7 +50,7 @@ int main()
 
     std::cout<<" === Testing atomic_queue destructor ==="<<'\n';
     {
-        aq::atomic_queue<Obj> ao;
+        aq::atomic_queue_base<Obj> ao;
 
         std::cout<<"Pushing "<<NUM_PUSHES<<" objects.\n";
         for (std::size_t idx = 0x00; idx < (0x00+NUM_PUSHES); ++idx)
@@ -63,7 +63,7 @@ int main()
     std::cout<<"Number of constructions: "<<construct_counter<<'\n'<<'\n';
     
     std::cout<<" === Testing  destructor ==="<<'\n';
-    aq::atomic_queue<Obj> ao;
+    aq::atomic_queue_base<Obj> ao;
 
     std::cout<<"Pushing "<<NUM_PUSHES<<" objects.\n";
     for (std::size_t idx = 0x00; idx < (0x00+NUM_PUSHES); ++idx)

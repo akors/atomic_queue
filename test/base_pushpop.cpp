@@ -11,7 +11,7 @@ void test_int()
 {
     std::cout<<" === Testing integer push/pop ==="<<'\n';
 
-    aq::atomic_queue<int> ai;
+    aq::atomic_queue_base<int> ai;
 
     ai.push_back(1);
     ai.push_back(22);
@@ -56,7 +56,7 @@ void test_obj()
     int id = 0xFF;
     std::size_t idx;
 
-    aq::atomic_queue<Obj> ao;
+    aq::atomic_queue_base<Obj> ao;
 
     TEST_ASSERT(ao.pop_front() == nullptr);
     TEST_ASSERT(ao.size() == 0);

@@ -25,7 +25,7 @@ const std::size_t NUM_PUSHES = 0xFF;
 int main()
 {
     std::size_t idx = 0;
-    aq::atomic_queue<Obj> ao;
+    aq::atomic_queue_base<Obj> ao;
 
     ao.push_back(Obj(idx++));
     ao.push_back(Obj(idx++));
