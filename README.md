@@ -19,22 +19,25 @@ This class compiles with the following compilers:
 
   * Clang >= 3.1, with -stdlib=libc++
   * GCC => 4.7, with -D_GLIBCXX_USE_SCHED_YIELD
-  * Visual Studio >= 2012 (_MSC_VER >= 17.00)
+  * Visual Studio >= 2012 (_MSC_VER >= 1700), without `emplace_back()` member function
 
-It should be noted that MSVC denied me some of the C++11 features I wanted to use. Those were: right angle brackets, uniform initialization syntax, noexcept specification. I want them. Give them to me! Now!
+It should be noted that MSVC denied me some of the C++11 features I wanted to use. Those were: right angle brackets, uniform initialization syntax, noexcept specification, variadic macors. I want them. Give them to me! Now!
 
 3) Usage
 --------
 
 The usage of this class is very simple:
 
-Create an instance of this class with the default constructor, push objects to the queue with the `push_back()` member function and remove them from the queu with the `pop_front()` function. All pointers returned by `pop_front()` must be deallocated with the `deallocate()` member.
+Create an instance of this class with the default constructor, push objects to the queue with the `push_back()` or the `emplace_back()`member function and remove them from the queue with the `pop_front()` function. All pointers returned by `pop_front()` must be deallocated with the `deallocate()` member.
 
 If the queue is empty, every call to pop_front() returns nullptr.
 
+    int five = 5;
+
     aq::atomic_qeue_base<int> ai;
-    ai.push_back(5);
-    ai.push_back(7);
+    ai.push_back(five);
+    ai.push_back(std::move(int(7));
+    ai.emplace_back(13);
 
     int *i = ai.pop_front();
     assert(*i == 5);
@@ -42,6 +45,10 @@ If the queue is empty, every call to pop_front() returns nullptr.
 
     i = ai.pop_front();
     assert(*i == 7);
+    ai.deallocate(i);
+
+    int *i = ai.pop_front();
+    assert(*i == 13);
     ai.deallocate(i);
 
     i = ai.pop_front();
