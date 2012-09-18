@@ -38,7 +38,7 @@ struct node
 * @tparam Allocator Allocator type
 */
 template <typename T, typename Allocator = std::allocator<T> >
-class atomic_queue
+class atomic_queue_base
 {
 public:
 
@@ -49,7 +49,7 @@ public:
     *
     * @note The queue is thread-safe after this function has returned.
     */
-    atomic_queue(const Allocator& alc = Allocator()) noexcept
+    atomic_queue_base(const Allocator& alc = Allocator()) noexcept
         : size_(0u), front_(nullptr), back_(nullptr),
         alc_(alc)
     { }
@@ -59,7 +59,7 @@ public:
     *
     * @note The queue is thread-safe before this function is invoked.
     */
-    ~atomic_queue() noexcept
+    ~atomic_queue_base() noexcept
     {
         node<T>* fr = front_; // atomic_load
 
@@ -202,7 +202,7 @@ protected:
 
 } // namespace detail
 
-using detail::atomic_queue;
+using detail::atomic_queue_base;
 
 } // namespace aq
 
