@@ -27,13 +27,13 @@ int main()
     std::size_t idx = 0;
     aq::atomic_queue<Obj> ao;
 
-    ao.push(Obj(idx++));
-    ao.push(Obj(idx++));
+    ao.push_back(Obj(idx++));
+    ao.push_back(Obj(idx++));
 
     TEST_ASSERT(ao.size() == 2);
 
     try {
-        ao.push(Obj(idx, true));
+        ao.push_back(Obj(idx, true));
     }
     catch(bool)
     {
@@ -43,19 +43,19 @@ int main()
 
     TEST_ASSERT(ao.size() == 2);
 
-    ao.push(Obj(idx++));
-    ao.push(Obj(idx++));
+    ao.push_back(Obj(idx++));
+    ao.push_back(Obj(idx++));
     TEST_ASSERT(ao.size() == 4);
 
     Obj* o;
 
-    o = ao.pop();
+    o = ao.pop_front();
     TEST_ASSERT(o->idx_ == 0); --idx; ao.deallocate(o);
-    o = ao.pop();
+    o = ao.pop_front();
     TEST_ASSERT(o->idx_ == 1); --idx; ao.deallocate(o);
-    o = ao.pop();
+    o = ao.pop_front();
     TEST_ASSERT(o->idx_ == 3); --idx; ao.deallocate(o);
-    o = ao.pop();
+    o = ao.pop_front();
     TEST_ASSERT(o->idx_ == 4); --idx; ao.deallocate(o);
 
     TEST_ASSERT(ao.size() == 0);

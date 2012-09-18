@@ -13,15 +13,15 @@ void test_int()
 
     aq::atomic_queue<int> ai;
 
-    ai.push(1);
-    ai.push(22);
-    ai.push(330);
-    ai.push(4400);
+    ai.push_back(1);
+    ai.push_back(22);
+    ai.push_back(330);
+    ai.push_back(4400);
     std::cout<<"Size is now "<<ai.size()<<'\n';
     TEST_ASSERT(ai.size() == 4);
 
     int* p;
-    while ((p = ai.pop()))
+    while ((p = ai.pop_front()))
     {
         std::cout<<"Popping "<<*p<<'\n';
         ai.deallocate(p);
@@ -58,13 +58,13 @@ void test_obj()
 
     aq::atomic_queue<Obj> ao;
 
-    TEST_ASSERT(ao.pop() == nullptr);
+    TEST_ASSERT(ao.pop_front() == nullptr);
     TEST_ASSERT(ao.size() == 0);
 
     std::cout<<"Pushing "<<NUM_PUSHES<<" objects.\n";
 
     for (idx = 0x00; idx < (0x00+NUM_PUSHES); ++idx)
-        ao.push(Obj(id, idx));
+        ao.push_back(Obj(id, idx));
 
     std::cout<<"Size is now "<<ao.size()<<'\n';
     TEST_ASSERT(ao.size() == NUM_PUSHES);
@@ -72,7 +72,7 @@ void test_obj()
     idx = 0x00;
 
     Obj* p;
-    while ((p = ao.pop()))
+    while ((p = ao.pop_front()))
     {
         TEST_ASSERT(p->data_ == Obj::calculate_data(id, idx));
         ao.deallocate(p);

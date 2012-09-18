@@ -54,7 +54,7 @@ int main()
 
         std::cout<<"Pushing "<<NUM_PUSHES<<" objects.\n";
         for (std::size_t idx = 0x00; idx < (0x00+NUM_PUSHES); ++idx)
-            ao.push(Obj(id, idx, &construct_counter));
+            ao.push_back(Obj(id, idx, &construct_counter));
 
         std::cout<<"Number of constructions: "<<construct_counter<<std::endl;
         std::cout<<"Destructing the whole queue object.\n";
@@ -67,12 +67,12 @@ int main()
 
     std::cout<<"Pushing "<<NUM_PUSHES<<" objects.\n";
     for (std::size_t idx = 0x00; idx < (0x00+NUM_PUSHES); ++idx)
-        ao.push(Obj(id, idx, &construct_counter));
+        ao.push_back(Obj(id, idx, &construct_counter));
 
     std::cout<<"Number of constructions: "<<construct_counter<<std::endl;
 
     Obj* p;
-    while ((p = ao.pop()))
+    while ((p = ao.pop_front()))
     {
         ao.deallocate(p);
     }
