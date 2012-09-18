@@ -91,8 +91,8 @@ public:
         while(fr)
         {
             node<T>* next = fr->next;
-            alc_.destroy(fr);
-            alc_.deallocate(fr, 1);
+            NodeAllocatorTraits::destroy(alc_, fr);
+            NodeAllocatorTraits::deallocate(alc_, fr, 1);
             fr = next;
         }
 
@@ -109,13 +109,15 @@ public:
     */
     void push_back(const T& t)
     {
-        typename NodeAllocator::pointer new_node = alc_.allocate(1);
+        auto new_node = NodeAllocatorTraits::allocate(alc_, 1);
 
         try {
-            ValueAllocator(alc_).construct(&new_node->t, t);
+            ValueAllocatorTraits::construct(
+                ValueAllocator(alc_), &new_node->t, t
+            );
         } catch(...)
         {
-            alc_.deallocate(new_node, 1);
+            NodeAllocatorTraits::deallocate(alc_, new_node, 1);
             throw;
         }
         new_node->next = nullptr;
@@ -133,13 +135,15 @@ public:
     */
     void push_back(T&& t)
     {
-        typename NodeAllocator::pointer new_node = alc_.allocate(1);
+        auto new_node = NodeAllocatorTraits::allocate(alc_, 1);
 
         try {
-            ValueAllocator(alc_).construct(&new_node->t, std::move(t));
+            ValueAllocatorTraits::construct(
+                ValueAllocator(alc_), &new_node->t, std::move(t)
+            );
         } catch(...)
         {
-            alc_.deallocate(new_node, 1);
+            NodeAllocatorTraits::deallocate(alc_, new_node, 1);
             throw;
         }
         new_node->next = nullptr;
@@ -160,13 +164,15 @@ public:
     template<typename... Args>
     void emplace_back(Args&&... args)
     {
-        typename NodeAllocator::pointer new_node = alc_.allocate(1);
+        auto new_node = NodeAllocatorTraits::allocate(alc_, 1);
 
         try {
-            ValueAllocator(alc_).construct(&new_node->t, std::forward(args)...);
+            ValueAllocatorTraits::construct(
+                ValueAllocator(alc_), &new_node->t, std::forward(args)...
+            );
         } catch(...)
         {
-            alc_.deallocate(new_node, 1);
+            NodeAllocatorTraits::deallocate(alc_, new_node, 1);
             throw;
         }
         new_node->next = nullptr;
@@ -224,7 +230,7 @@ public:
         if (!obj) return;
 
         // call destructor
-        alc_.destroy(reinterpret_cast<node<T>*>(obj));
+        NodeAllocatorTraits::destroy(alc_, reinterpret_cast<node<T>*>(obj));
 
         // nodes with next == 0 are still referenced by an executing
         // push_back() function and the next ptr will be modified.
@@ -233,7 +239,9 @@ public:
         while(!reinterpret_cast<node<T>*>(obj)->next.load())
             std::this_thread::yield();
 
-        alc_.deallocate(reinterpret_cast<node<T>*>(obj), 1);
+        NodeAllocatorTraits::deallocate(
+            alc_, reinterpret_cast<node<T>*>(obj), 1
+        );
     }
 
 
@@ -271,7 +279,15 @@ protected:
     }
 
     typedef Allocator ValueAllocator;
-    typedef typename Allocator::template rebind<node<T> >::other NodeAllocator;
+    typedef std::allocator_traits<ValueAllocator> ValueAllocatorTraits;
+
+    // Rebind allocator traits for ValueAllocator to our own NodeAllocator
+    typedef
+        typename ValueAllocatorTraits::template rebind_traits<node<T> >::other
+        NodeAllocatorTraits;
+
+    // Get actual allocator type from traits
+    typedef typename NodeAllocatorTraits::allocator_type NodeAllocator;
 
     std::atomic_size_t size_ /**< Current size of queue. Not reliable. */;
     std::atomic<node<T>*> front_ /**< Front of the queue. */;
