@@ -21,8 +21,8 @@ namespace detail {
 template <typename T>
 struct node
 {
-    T t /**< Value */; 
-    std::atomic<node<T>*> next /**< Next node in list */; 
+    T t /**< Value */;
+    std::atomic<node<T>*> next /**< Next node in list */;
 };
 
 
@@ -30,8 +30,8 @@ struct node
 *
 * Use this class as a queue where multiple threads can read from and write
 * to at the same time.
-* To add elements to the queue, use the push() function.
-* To remove and retrieve elements, use the pop() function, but remember to 
+* To add elements to the queue, use the push_back() function.
+* To remove and retrieve elements, use the pop_front() function, but remember to
 * deallocate the value with deallocate() after using it.
 *
 * @tparam T Type of the objects this queue will hold.
@@ -45,18 +45,18 @@ public:
     /** Construct an empty qeue.
     *
     * @param alc Allocator object that is to be used for memory
-    * allocation/deallocation. 
+    * allocation/deallocation.
     *
     * @note The queue is thread-safe after this function has returned.
     */
     atomic_queue(const Allocator& alc = Allocator()) noexcept
-        : size_(0u), front_(nullptr), end_(nullptr),
+        : size_(0u), front_(nullptr), back_(nullptr),
         alc_(alc)
     { }
 
 
     /** Destructor.
-    * 
+    *
     * @note The queue is thread-safe before this function is invoked.
     */
     ~atomic_queue() noexcept
@@ -81,7 +81,7 @@ public:
     *
     * @note This function is Thread-safe, lock-free and wait-free.
     */
-    void push(const T& t)
+    void push_back(const T& t)
     {
         typename NodeAllocator::pointer new_node = alc_.allocate(1);
 
@@ -109,7 +109,7 @@ public:
     *
     * @note This function is Thread-safe, lock-free but not wait-free.
     */
-    T* pop() noexcept
+    T* pop_front() noexcept
     {
         node<T>* old_front = front_;
         node<T>* new_front;
@@ -121,21 +121,22 @@ public:
 
         --size_;
 
-        // if the old front was also the end, the queue is now empty.
+        // if the old front was also the back, the queue is now empty.
         new_front = old_front;
-        if(end_.compare_exchange_strong(new_front, nullptr))
+        if(back_.compare_exchange_strong(new_front, nullptr))
             old_front->next = old_front;
 
         return reinterpret_cast<T*>(old_front);
     }
 
-    /** Deallocate an object returned by pop().
+    /** Deallocate an object returned by pop_front().
     *
-    * This function must be used to destroy objects that are returned by pop().
-    * Do not use this function with an object that was not returned by pop(),
-    * even if the type matches.
+    * This function must be used to destroy objects that are returned by
+    * pop_front().
+    * Do not use this function with an object that was not returned by
+    * pop_front(), even if the type matches.
     *
-    * @param obj A pointer to an object returned by pop().
+    * @param obj A pointer to an object returned by pop_front().
     *
     * @note This function is Thread-safe, lock-free but not wait-free.
     */
@@ -147,8 +148,8 @@ public:
         alc_.destroy(reinterpret_cast<node<T>*>(obj));
 
         // nodes with next == 0 are still referenced by an executing
-        // push() function and the next ptr will be modified.
-        // Since we don't want push() to write to deallocated memory, we hang
+        // push_back() function and the next ptr will be modified.
+        // Since we don't want push_back() to write to deallocated memory, we hang
         // in a loop until the node has a non-zero next ptr.
         while(!reinterpret_cast<node<T>*>(obj)->next.load())
             std::this_thread::yield();
@@ -162,7 +163,7 @@ public:
     * This function returns an approximation of the current queue size.
     * In a multithreaded environment, this value might change immediately
     * before or after the invocation. Especially, it is *not* guaranteed that
-    * if(size() != 0) assert(pop() != nullptr) !
+    * if(size() != 0) assert(pop_front() != nullptr) !
     *
     * In multithreaded environments, please consider to not use this function.
     *
@@ -177,7 +178,7 @@ protected:
 
     void push_node(node<T>* new_node) noexcept
     {
-        node<T>* old_end = end_.exchange(new_node);
+        node<T>* old_back = back_.exchange(new_node);
         node<T>* null_node = nullptr;
 
         // if front_ was set to null (no node yet), we have to update the front_
@@ -185,7 +186,7 @@ protected:
         if(!front_.compare_exchange_strong(null_node, new_node))
             // if front_ is not null, then there was a previous node.
             // We have to update this nodes next pointer.
-            old_end->next  = new_node;
+            old_back->next  = new_node;
 
         ++size_;
     }
@@ -195,7 +196,7 @@ protected:
 
     std::atomic_size_t size_ /**< Current size of queue. Not reliable. */;
     std::atomic<node<T>*> front_ /**< Front of the queue. */;
-    std::atomic<node<T>*> end_ /**< End of the queue. */;
+    std::atomic<node<T>*> back_ /**< Back of the queue. */;
     NodeAllocator alc_ /**< Allocator for node<T> objects. */;
 };
 
