@@ -7,10 +7,8 @@
 #include <thread>
 
 // At the time of writing, MSVC didn't know noexcept
-#if defined(_MSC_VER)
-#if _MSC_VER <= 1700
-#   define noexcept
-#endif
+#if defined(_MSC_VER) && _MSC_VER <= 1700
+#   define noexcept throw()
 #endif
 
 namespace aq {
@@ -73,7 +71,8 @@ public:
 
     }
 
-    /** Push object into the queue.
+
+    /** Push object into the queue by copying it.
     *
     * @param t Object you want to push into the queue. Requires T to be
     * CopyConstructible.
@@ -96,6 +95,51 @@ public:
 
         push_node(new_node);
     }
+
+    /** Push object into the queue by moving it.
+    *
+    * @param t Object you want to push into the queue. Requires T to be
+    * MoveConstructible.
+    * @throws Any exceptions thrown by the move constructor of the object.
+    *
+    * @note This function is Thread-safe, lock-free and wait-free.
+    */
+    void push_back(T&& t)
+    {
+        typename NodeAllocator::pointer new_node = alc_.allocate(1);
+
+        try {
+            ValueAllocator(alc_).construct(&new_node->t, std::move(t));
+        } catch(...)
+        {
+            alc_.deallocate(new_node, 1);
+            throw;
+        }
+        new_node->next = nullptr;
+
+        push_node(new_node);
+    }
+
+// I WANT C++11!!! NOW!!!
+#if !(defined(_MSC_VER) && _MSC_VER <= 1700)
+    template<typename... Args>
+    void emplace_back(Args&&... args)
+    {
+        typename NodeAllocator::pointer new_node = alc_.allocate(1);
+
+        try {
+            ValueAllocator(alc_).construct(&new_node->t, std::forward(args)...);
+        } catch(...)
+        {
+            alc_.deallocate(new_node, 1);
+            throw;
+        }
+        new_node->next = nullptr;
+
+        push_node(new_node);
+    }
+#endif
+
 
     /** Pop object from the queue.
     *
