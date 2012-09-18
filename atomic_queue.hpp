@@ -59,7 +59,7 @@ public:
     */
     ~atomic_queue_base() noexcept
     {
-        node<T>* fr = front_; // atomic_load
+        node<T>* fr = front_;
 
         while(fr)
         {
@@ -122,6 +122,14 @@ public:
 
 // I WANT C++11!!! NOW!!!
 #if !(defined(_MSC_VER) && _MSC_VER <= 1700)
+
+    /** Create and push object into the queue.
+    *
+    * @param args... Arguments to the objects constructor
+    * @throws Any exceptions thrown by the constructor of the object.
+    *
+    * @note This function is Thread-safe, lock-free and wait-free.
+    */
     template<typename... Args>
     void emplace_back(Args&&... args)
     {
