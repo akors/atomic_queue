@@ -5,7 +5,7 @@
 #include "testutils.hpp"
 
 
-DECLARE_TEST("base Construction/Destruction")
+DECLARE_TEST("base Destruction")
 
 struct Obj {
     int id_;
