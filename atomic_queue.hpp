@@ -288,6 +288,9 @@ protected:
     // Rebind allocator traits for ValueAllocator to our own NodeAllocator
     typedef
         typename ValueAllocatorTraits::template rebind_traits<node<T> >
+#if defined(_MSC_VER) && _MSC_VER <= 1700
+		::other
+#endif
         NodeAllocatorTraits;
 
     // Get actual allocator type from traits
