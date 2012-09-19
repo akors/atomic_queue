@@ -112,8 +112,10 @@ public:
         auto new_node = NodeAllocatorTraits::allocate(alc_, 1);
 
         try {
+            ValueAllocator alc(alc_);
             ValueAllocatorTraits::construct(
-                ValueAllocator(alc_), &new_node->t, t
+               alc,
+               &new_node->t, t
             );
         } catch(...)
         {
@@ -138,8 +140,9 @@ public:
         auto new_node = NodeAllocatorTraits::allocate(alc_, 1);
 
         try {
+            ValueAllocator alc(alc_);
             ValueAllocatorTraits::construct(
-                ValueAllocator(alc_), &new_node->t, std::move(t)
+               alc, &new_node->t, std::move(t)
             );
         } catch(...)
         {
@@ -167,8 +170,9 @@ public:
         auto new_node = NodeAllocatorTraits::allocate(alc_, 1);
 
         try {
+            ValueAllocator alc(alc_);
             ValueAllocatorTraits::construct(
-                ValueAllocator(alc_), &new_node->t, std::forward(args)...
+               alc, &new_node->t, std::forward<Args>(args)...
             );
         } catch(...)
         {
@@ -283,7 +287,7 @@ protected:
 
     // Rebind allocator traits for ValueAllocator to our own NodeAllocator
     typedef
-        typename ValueAllocatorTraits::template rebind_traits<node<T> >::other
+        typename ValueAllocatorTraits::template rebind_traits<node<T> >
         NodeAllocatorTraits;
 
     // Get actual allocator type from traits
