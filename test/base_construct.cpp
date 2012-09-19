@@ -36,11 +36,10 @@ int main()
     aq::atomic_queue_base<Obj> ao;
 
     Obj o(33);
-    ao.push_back(o);    
+    ao.push_back(o);
     ao.push_back(std::move(Obj(22)));
 #if !(defined(_MSC_VER) && _MSC_VER <= 1700)
     ao.emplace_back(11);
-    TEST_ASSERT(op->cons == Obj::MOVE_CONSTRUCTED); ao.deallocate(op);
 #endif
 
     Obj *op;
