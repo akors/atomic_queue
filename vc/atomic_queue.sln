@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_exceptions", "test_exc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_construct", "test_construct\test_construct.vcxproj", "{D0C40965-1210-4005-9C73-F9C4726183C9}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_multi_pushpop", "test_multi_pushpop\test_multi_pushpop.vcxproj", "{0A829100-73D0-4B8A-B975-136639982A9F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -37,6 +39,10 @@ Global
 		{D0C40965-1210-4005-9C73-F9C4726183C9}.Debug|Win32.Build.0 = Debug|Win32
 		{D0C40965-1210-4005-9C73-F9C4726183C9}.Release|Win32.ActiveCfg = Release|Win32
 		{D0C40965-1210-4005-9C73-F9C4726183C9}.Release|Win32.Build.0 = Release|Win32
+		{0A829100-73D0-4B8A-B975-136639982A9F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0A829100-73D0-4B8A-B975-136639982A9F}.Debug|Win32.Build.0 = Debug|Win32
+		{0A829100-73D0-4B8A-B975-136639982A9F}.Release|Win32.ActiveCfg = Release|Win32
+		{0A829100-73D0-4B8A-B975-136639982A9F}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
