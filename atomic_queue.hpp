@@ -25,6 +25,9 @@
 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+// Please don't use this, it's broken
+#error This implementation of a lock-free queue suffers from the ABA-Problem. Please use Boost.Lockfree instead!
+
 #ifndef ATOMIC_QUEUE_HPP_INCLUDED
 #define ATOMIC_QUEUE_HPP_INCLUDED
 
