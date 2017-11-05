@@ -1,3 +1,18 @@
+# DO NOT USE THIS CODE!
+
+Please do not use this Code in your production code, because it has one major bug: it suffers from the ABA-Problem!
+
+That means:
+In rare conditions, it can happen that if an object in the queue is popped and deallocated, and another object allocated and pushed, that the address of the new object is the same as the address of the old object. This is a clear race condition.
+
+The discussion of this of this particular code can be found here: https://codereview.stackexchange.com/a/15775/16517
+
+Here is a general description of the ABA-Problem: https://en.wikipedia.org/wiki/ABA_problem
+
+For an implementation that actually works: http://www.boost.org/doc/libs/release/doc/html/boost/lockfree/queue.html
+
+Sorry for your inconveniance
+
 atomic_queue
 ============
 
